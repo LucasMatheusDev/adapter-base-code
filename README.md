@@ -25,13 +25,14 @@ Because this idea came about through a Getx problem, maybe this architecture is 
   
    ### What is a Base Code?
 
-     A Base Code is a code that serves as the basis for your project, where you can create a new project and already have a structure of folders and files ready for you to start developing.
+  A Base Code is a code that serves as the basis for your project, where you can create a new project and already have a structure of folders and files ready for you to start developing.
 
+___
    ### ABC Technique - Adapter Base Code
 
-     The ABC technique is a technique that aims to create an Adapter Base Code where you will make a **wrapper** of your main package, and so you can change the main package without having to change your code, because your code will communicate with your Adapter Base Code, not the main package.
+  The ABC technique is a technique that aims to create an Adapter Base Code where you will make a **wrapper** of your main package, and so you can change the main package without having to change your code, because your code will communicate with your Adapter Base Code, not the main package.
 
-     An example is Dependency Injection that you will see next.
+  *An example is Dependency Injection that you will see next.*
 
 
 # How to use:
