@@ -443,6 +443,44 @@ abstract class _Reactive<T> with Store {
 }
 
 ```
+ # Using Stream as State Management:
+
+ ```dart
+ final StreamController<T> _value;
+
+ 
+  final String? tag;
+
+  Reactive(T initValue, {this.tag})
+      : _value = StreamController<T>.broadcast()..sink.add(initValue);
+
+  StreamController<T> get reactiveValue => _value;
+
+  late T _lastValue;
+
+  T get pureReactiveValue => _lastValue;
+
+  void _onUpdate() {}
+
+  void onDisposed() {
+    _value.close();
+  }
+
+  set updateValue(T newValue) {
+    _lastValue = newValue;
+    _value.sink.add(newValue);
+    _onUpdate();
+  }
+
+  void update() {
+    _value.sink.add(_lastValue);
+    _onUpdate();
+  }
+  ```
+   
+  Note : 
+   > The **_lastValue** Variable is responsible for storing the last value that was assigned to **_internalValue** , because **_internalValue** is a [StreamController] and there is no way to get the last value that was assigned to it. This will only be necessary if you need this value without accessing a Stream , in code that is asynchronous because your state managers will not need this value, therefore creating this attribute is **optional**.
+
 
   _______________________________________________________________
   # Understanding ManagerReactiveState:
@@ -455,6 +493,8 @@ abstract class _Reactive<T> with Store {
   
   These states are based on the enum [StateCondition](lib\src\enum\state_enum.dart)
   Look :
+
+
   ```dart
   enum StateCondition {
     onLoading,
@@ -474,6 +514,9 @@ abstract class _Reactive<T> with Store {
 
   - ***changeStateToDone***, where the widget state will be changed to onDone and receives a parameter of type T, which is the value that will be assigned to the onDone state.
 
+
+   ### Note: 
+   > The same modifications made to [ReactiveStateComponent] should also be made to [ReactiveComponent](lib\src\view\components\reactive_component.dart)) as both depend on the reactivity type chosen.
 ___
 
 
@@ -563,6 +606,62 @@ class ManagerReactiveState<T> {
   Note: 
    > So far we have learned to change the state management of the classes responsible for **Logic** , the widgets that listen for the changes and rebuild the screen must follow these changes and we will see that now.
 
+  # Using ManagerReactiveState with Stream:
+  ```dart
+  import 'package:flutter/material.dart';
+  import 'package:reactive_state/src/config/state_manager/manager_reactive_state.dart';
+  import 'package:reactive_state/src/view/components/reactive_component.dart';
+
+  import 'package:get/get.dart';
+  /// Reactive value that represents the current state of the application.
+  StreamController<StateCondition> get reactiveStateValue =>
+      reactiveState.reactiveValue;
+
+  final StreamController<T> _internalValue;
+
+  /// Internal value of the state of type [T]
+  T get internalValue => _lastValue;
+
+  T _lastValue;
+
+  /// Change the internal value of type [T]
+  set internalValue(T newValue) {
+    _lastValue = newValue;
+    _internalValue.sink.add(newValue);
+  }
+
+  String? messageError;
+
+  ManagerReactiveState(T initValue)
+      : _lastValue = initValue,
+        _internalValue = StreamController<T>.broadcast()..sink.add(initValue);
+
+        
+  void onDisposed() {
+    _internalValue.close();
+  }
+
+  void changeStateToDone({required T newValue}) {
+    _lastValue = newValue;
+    _internalValue.sink.add(newValue);
+    reactiveState.updateValue = StateCondition.onDone;
+    _onUpdate();
+  }
+
+  void updateState({required T newValue}) {
+    _lastValue = newValue;
+    _internalValue.sink.add(newValue);
+    reactiveState.updateValue = StateCondition.onLoading;
+    reactiveState.updateValue = StateCondition.onDone;
+    _onUpdate();
+  }
+
+  ... // The rest of the code remains the same...
+
+  ```      
+  Note : 
+   > The **_lastValue** Variable is responsible for storing the last value that was assigned to **_internalValue** , because **_internalValue** is a [StreamController] and there is no way to get the last value that was assigned to it. This will only be necessary if you need this value without accessing a Stream , in code that is asynchronous because your state managers will not need this value, therefore creating this attribute is **optional**.
+
 ___
 #  ReactiveStateComponent o que é ? 
 It is the widget responsible for listening to changes and rebuilding the screen, its differential is having the possibility of having more than one state, such as the state of **onLoading** , **onError** , **onEmpty** and * *onDone** , all configurable.
@@ -640,5 +739,36 @@ Note:
     );
   }
 ```
+
+# ReactiveStateComponent com Stream:
+ ```dart
+  @override
+  void dispose() {
+    widget.managerStateReactive.onDisposed();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: widget.managerStateReactive.reactiveStateValue.stream,
+      builder: (context, value) {
+        if (value.data == StateCondition.onDone) {
+          return widget.onDone(widget.managerStateReactive.internalValue);
+        } else if (value.data == StateCondition.onEmpty) {
+          return widget.onEmpty();
+        } else if (value.data == StateCondition.onError) {
+          return widget.onError(widget.managerStateReactive.messageError ?? "");
+        } else {
+          return widget.onLoading();
+        }
+      },
+    );
+  }
+}
+
+ ```
+  Note: 
+ > When using [ReactiveStateComponent](lib\src\view\components\reactive_component.dart) with Streams, it is necessary to dispose of StreamControllers, as StreamBuilder does not do this automatically. a possible solution is to add the controller's dispose in the **onDispose** function of the [ManagerReactiveState] class and make its [ReactiveStateComponent] as StateFull so that it can call the dispose in the State's **dispose** function.
  
 
