@@ -399,7 +399,7 @@ import 'package:get/get.dart';
   # Using Mobx as State Management:
 
   #### Note: 
-  > To use Mobx as a state manager, it is necessary that the project has the mobx as a dependency, and that the mobx_codegen is configured in pubspec.yaml, for more information on how to configure the mobx_codegen, access the link: [Mobx](https: //pub.dev/packages/mobx_codegen)
+  > To use Mobx as a state manager, it is necessary that the project has the mobx as a dependency, and that the mobx_codegen is configured in pubspec.yaml, for more information on how to configure the mobx_codegen, access the link: [Mobx](https://pub.dev/packages/mobx_codegen)
 
 
   ```dart
