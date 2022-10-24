@@ -317,7 +317,7 @@ ___
    > In the example above, Reactive is involved with the Rx of Getx, so Reactive will be responsible for managing the state of an Rx.
 
   ```dart
-      // With Getx
+      // With ValueNotifier
       class Reactive<T> {
       final ValueNotifier<T> _value;
       // ...
