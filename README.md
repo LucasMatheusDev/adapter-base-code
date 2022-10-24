@@ -293,7 +293,7 @@ enum Routes {
   ### Example
   
    ``` dart
-    Reactive<String> reactive = Reactive<String>();
+    Reactive<String> reactive = Reactive<String>("text");
   ```
     
   > Reactive is a generic class, and the generic type is defined at the moment of instantiation of the class, in the example above, the generic type is String, so Reactive will be responsible for managing the state of a String.
